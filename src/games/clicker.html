@@ -78,16 +78,32 @@
     });
 
     resetBtn.addEventListener('click', () => {
+        // 1. Останавливаем таймер
         clearInterval(timerId);
+        timerId = null; // Обязательно обнуляем ID таймера
+        
+        // 2. Сбрасываем переменные
         score = 0;
         timeLeft = 30;
         isGameActive = false;
+        
+        // 3. Обнуляем рекорд (если хочешь очистить и его)
+        bestScore = 0;
+        localStorage.removeItem('clickerBestScore');
+        
+        // 4. Обновляем экран
         scoreDisplay.textContent = score;
         timerDisplay.textContent = timeLeft;
+        bestScoreDisplay.textContent = bestScore;
+        
+        // 5. Возвращаем кнопку в рабочее состояние
         clickBtn.disabled = false;
         clickBtn.style.backgroundColor = '#2196F3';
+        
+        console.log("Счёт и рекорд сброшены!"); 
     });
 </script>
 
 </body>
+
 </html>
