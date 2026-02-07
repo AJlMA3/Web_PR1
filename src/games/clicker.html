@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Кликер</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f4; }
+        .game-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+        #click-btn { background-color: #2196F3; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; margin: 20px 0; transition: transform 0.1s; }
+        #click-btn:active { transform: scale(0.95); }
+        #reset-btn { background-color: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .stats { font-size: 20px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <div class="stats">Осталось времени: <span id="timer">30</span>s</div>
+    <div class="stats">Счёт: <span id="score">0</span></div>
+    <div class="stats">Рекорд: <span id="best-score">0</span></div>
+    
+    <button id="click-btn">НАЖМИ МЕНЯ!</button>
+    <br>
+    <button id="reset-btn">Сбросить Счёт</button>
+</div>
+
+<script>
+    let score = 0;
+    let timeLeft = 30;
+    let timerId = null;
+    let isGameActive = false;
+
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const bestScoreDisplay = document.getElementById('best-score');
+    const clickBtn = document.getElementById('click-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    // Загружаем рекорд из localStorage
+    let bestScore = localStorage.getItem('clickerBestScore') || 0;
+    bestScoreDisplay.textContent = bestScore;
+
+    function startGame() {
+        isGameActive = true;
+        timerId = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function endGame() {
+        clearInterval(timerId);
+        isGameActive = false;
+        clickBtn.disabled = true;
+        alert("Игра окончена! Ваш результат: " + score);
+        
+        if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem('clickerBestScore', bestScore);
+            bestScoreDisplay.textContent = bestScore;
+        }
+    }
+
+    clickBtn.addEventListener('click', () => {
+        if (!isGameActive && timeLeft === 30) {
+            startGame();
+        }
+        
+        if (isGameActive) {
+            score++;
+            scoreDisplay.textContent = score;
+            // Случайный цвет кнопки при клике
+            clickBtn.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 50%)`;
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        clearInterval(timerId);
+        score = 0;
+        timeLeft = 30;
+        isGameActive = false;
+        scoreDisplay.textContent = score;
+        timerDisplay.textContent = timeLeft;
+        clickBtn.disabled = false;
+        clickBtn.style.backgroundColor = '#2196F3';
+    });
+</script>
+
+</body>
+</html>
