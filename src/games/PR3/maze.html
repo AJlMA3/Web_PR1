@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабиринт с таймером</title>
+    <style>
+        body { font-family: sans-serif; background: #34495e; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .stats { margin-bottom: 10px; font-size: 20px; font-weight: bold; }
+        .maze { 
+            display: grid; 
+            grid-template-columns: repeat(5, 60px); 
+            grid-template-rows: repeat(5, 60px); 
+            gap: 3px; 
+            background: #2c3e50; 
+            padding: 10px; 
+            border: 4px solid #f1c40f;
+        }
+        .cell { width: 60px; height: 60px; background: #ecf0f1; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+        .wall { background: #7f8c8d; } /* Стены */
+        .player { background: #e74c3c; border-radius: 50%; width: 45px; height: 45px; border: 2px solid white; }
+        .finish { background: #2ecc71; } /* Финиш */
+        .btn-start { margin-top: 20px; padding: 10px 25px; background: #f1c40f; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="stats">Времени осталось: <span id="timer">30</span>с</div>
+    
+    <div id="maze" class="maze"></div>
+
+    <button class="btn-start" onclick="startGame()">Начать</button>
+
+<script>
+    const map = [
+        [2, 0, 1, 0, 0],
+        [1, 0, 1, 0, 1],
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 1, 0, 3]
+    ];
+
+    let playerPos = { x: 0, y: 0 };
+    let timeLeft = 30;
+    let timerId = null;
+    let gameActive = false;
+
+    function drawMaze() {
+        const mazeElement = document.getElementById('maze');
+        mazeElement.innerHTML = '';
+        for (let y = 0; y < map.length; y++) {
+            for (let x = 0; x < map[y].length; x++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                if (map[y][x] === 1) cell.classList.add('wall');
+                if (map[y][x] === 3) {
+                    cell.classList.add('finish');
+                    cell.innerHTML = '🏁';
+                }
+                if (x === playerPos.x && y === playerPos.y) {
+                    const p = document.createElement('div');
+                    p.className = 'player';
+                    cell.appendChild(p);
+                }
+                mazeElement.appendChild(cell);
+            }
+        }
+    }
+
+    function startGame() {
+        clearInterval(timerId);
+        playerPos = { x: 0, y: 0 };
+        timeLeft = 30;
+        gameActive = true;
+        document.getElementById('timer').textContent = timeLeft;
+        
+        drawMaze();
+
+        timerId = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+            if (timeLeft <= 0) {
+                endGame("Время вышло! ⌛");
+            }
+        }, 1000);
+    }
+
+    function endGame(message) {
+        gameActive = false;
+        clearInterval(timerId);
+        alert(message);
+    }
+
+    window.onkeydown = function(e) {
+        if (!gameActive) return;
+
+        let newX = playerPos.x;
+        let newY = playerPos.y;
+
+        if (e.key === "ArrowUp") newY--;
+        if (e.key === "ArrowDown") newY++;
+        if (e.key === "ArrowLeft") newX--;
+        if (e.key === "ArrowRight") newX++;
+
+        if (newY >= 0 && newY < 5 && newX >= 0 && newX < 5 && map[newY][newX] !== 1) {
+            playerPos.x = newX;
+            playerPos.y = newY;
+            drawMaze();
+
+            if (map[newY][newX] === 3) {
+                endGame("Победа! Вы нашли выход! 🎉");
+            }
+        }
+    };
+
+    drawMaze(); // Начальный рендеринг
+</script>
+</body>
+</html>

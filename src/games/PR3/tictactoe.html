@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Крестики-нолики</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #34495e; color: white; }
+        .status { font-size: 24px; margin-bottom: 20px; }
+        .board { display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; }
+        .cell { width: 100px; height: 100px; background: #ecf0f1; border: none; font-size: 40px; font-weight: bold; cursor: pointer; color: #2c3e50; border-radius: 8px; transition: 0.3s; }
+        .cell:hover { background: #bdc3c7; }
+        .cell.taken { cursor: not-allowed; }
+        .btn-reset { margin-top: 30px; padding: 10px 20px; background: #e67e22; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="status" id="status">Ход игрока: X</div>
+<div class="board" id="board">
+    </div>
+<button class="btn-reset" onclick="resetGame()">Начать заново</button>
+
+<script>
+    const boardElement = document.getElementById('board');
+    const statusElement = document.getElementById('status');
+    let currentPlayer = 'X';
+    let gameState = ["", "", "", "", "", "", "", "", ""]; // Состояние поля
+    let gameActive = true;
+
+    // Выигрышные комбинации (индексы ячеек)
+    const winningConditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Горизонтали
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Вертикали
+        [0, 4, 8], [2, 4, 6]             // Диагонали
+    ];
+
+    function createBoard() {
+        boardElement.innerHTML = "";
+        gameState.forEach((cell, index) => {
+            const cellElement = document.createElement('button');
+            cellElement.classList.add('cell');
+            cellElement.setAttribute('data-index', index);
+            cellElement.innerText = cell;
+            cellElement.addEventListener('click', handleCellClick);
+            boardElement.appendChild(cellElement);
+        });
+    }
+
+    function handleCellClick(event) {
+        const clickedCell = event.target;
+        const index = parseInt(clickedCell.getAttribute('data-index'));
+
+        if (gameState[index] !== "" || !gameActive) return;
+
+        gameState[index] = currentPlayer;
+        clickedCell.innerText = currentPlayer;
+        clickedCell.classList.add('taken');
+
+        checkResult();
+    }
+
+    function checkResult() {
+        let roundWon = false;
+
+        for (let i = 0; i < winningConditions.length; i++) {
+            const [a, b, c] = winningConditions[i];
+            if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                roundWon = true;
+                break;
+            }
+        }
+
+        if (roundWon) {
+            statusElement.innerText = `Победа игрока ${currentPlayer}! 🎉`;
+            gameActive = false;
+            return;
+        }
+
+        if (!gameState.includes("")) {
+            statusElement.innerText = "Ничья! 🤝";
+            gameActive = false;
+            return;
+        }
+
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusElement.innerText = `Ход игрока: ${currentPlayer}`;
+    }
+
+    function resetGame() {
+        currentPlayer = 'X';
+        gameState = ["", "", "", "", "", "", "", "", ""];
+        gameActive = true;
+        statusElement.innerText = "Ход игрока: X";
+        createBoard();
+    }
+
+    createBoard();
+</script>
+
+</body>
+</html>
